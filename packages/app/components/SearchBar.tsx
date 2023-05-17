@@ -61,11 +61,8 @@ export default function SearchBar({
           autoCorrect={false}
           style={[
             Platform.OS === 'web' && {
-              outlineStyle: 'none',
-              flex: 1,
-              paddingHorizontal: 20,
+              paddingHorizontal: 10,
               fontSize: 16,
-              fontWeight: 'bold',
             },
             {
               color: mode === 'light' ? '#000' : '#fff',
