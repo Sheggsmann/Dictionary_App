@@ -1,12 +1,12 @@
-import 'raf/polyfill'
-import 'setimmediate'
+import 'raf/polyfill';
+import 'setimmediate';
 
-import { Provider } from 'app/provider'
-import Head from 'next/head'
-import React from 'react'
+import { Provider } from 'app/provider';
+import Head from 'next/head';
+import React from 'react';
 
-import '../global.css'
-import { AppProps } from 'next/app'
+import '../global.css';
+import { AppProps } from 'next/app';
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
@@ -23,7 +23,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         <Component {...pageProps} />
       </Provider>
     </>
-  )
+  );
 }
 
-export default MyApp
+export default MyApp;

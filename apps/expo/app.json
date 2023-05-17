@@ -4,9 +4,20 @@
     "slug": "solito-nativewind",
     "version": "1.0.0",
     "scheme": "solito-nativewind",
-    "platforms": ["ios", "android"],
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "ios": {
-      "bundleIdentifier": "com.solito.nativewind"
+      "bundleIdentifier": "com.sheggs.dictionary.app"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "27efb342-e2d0-45f4-9478-ab6a2e3ad03c"
+      }
+    },
+    "android": {
+      "package": "com.solito.nativewind"
     }
   }
 }

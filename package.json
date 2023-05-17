@@ -1,5 +1,5 @@
 {
-  "name": "solito-with-tailwind",
+  "name": "dictionary-app",
   "private": true,
   "workspaces": [
     "apps/*",
@@ -21,5 +21,9 @@
   "engines": {
     "node": ">=16.0.0 <17.0.0"
   },
-  "packageManager": "yarn@3.4.1"
+  "packageManager": "yarn@3.4.1",
+  "dependencies": {
+    "@expo/vector-icons": "^13.0.0",
+    "react-query": "^3.39.3"
+  }
 }

@@ -1,69 +1,116 @@
-import { A, H1, P, Text, TextLink } from 'app/design/typography'
-import { Row } from 'app/design/layout'
-import { View } from 'app/design/view'
+import { useState } from 'react';
+import { useQuery } from 'react-query';
+import { A, H1, Text } from 'app/design/typography';
+import { View } from 'app/design/view';
+import Header from 'app/components/Header';
+import SearchBar from 'app/components/SearchBar';
 
-import { MotiLink } from 'solito/moti'
+import { useSafeArea } from 'app/provider/safe-area/use-safe-area';
+import { ScrollView } from 'react-native';
+import WordMeaning from 'app/components/WordMeaning';
+import PlayButton from 'app/components/PlayButton';
+
+type IWordResponse = {
+  word: string;
+  phonetic: string;
+  phonetics: { text: string; audio: string }[];
+  meanings: {
+    partOfSpeech: string;
+    definitions: { definition: string; synonyms: string[] }[];
+  }[];
+  sourceUrls: string[];
+};
 
 export function HomeScreen() {
-  return (
-    <View className="flex-1 items-center justify-center p-3">
-      <H1>Welcome to Solito.</H1>
-      <View className="max-w-xl">
-        <P className="text-center">
-          Here is a basic starter to show you how you can navigate from one
-          screen to another. This screen uses the same code on Next.js and React
-          Native.
-        </P>
-        <P className="text-center">
-          Solito is made by{' '}
-          <A
-            href="https://twitter.com/fernandotherojo"
-            hrefAttrs={{
-              target: '_blank',
-              rel: 'noreferrer',
-            }}
-          >
-            Fernando Rojo
-          </A>
-          .
-        </P>
-        <P className="text-center">
-          NativeWind is made by{' '}
-          <A
-            href="https://twitter.com/mark__lawlor"
-            hrefAttrs={{
-              target: '_blank',
-              rel: 'noreferrer',
-            }}
-          >
-            Mark Lawlor
-          </A>
-          .
-        </P>
-      </View>
-      <View className="h-[32px]" />
-      <Row className="space-x-8">
-        <TextLink href="/user/fernando">Regular Link</TextLink>
-        <MotiLink
-          href="/user/fernando"
-          animate={({ hovered, pressed }) => {
-            'worklet'
+  const insets = useSafeArea();
+  const [word, setWord] = useState('');
 
-            return {
-              scale: pressed ? 0.95 : hovered ? 1.1 : 1,
-              rotateZ: pressed ? '0deg' : hovered ? '-3deg' : '0deg',
-            }
-          }}
-          transition={{
-            type: 'timing',
-            duration: 150,
-          }}
-        >
-          <Text selectable={false} className="text-base font-bold">
-            Moti Link
-          </Text>
-        </MotiLink>
-      </Row>
+  const getWordMeaning = async (word: string) => {
+    const res = await fetch(
+      `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`
+    );
+    return res.json();
+  };
+
+  const { data, error, isLoading, refetch } = useQuery(
+    ['wordMeaning'],
+    () => getWordMeaning(word),
+    {
+      enabled: false,
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  const onSearch = () => {
+    if (word.length) refetch();
+  };
+
+  return (
+    <View
+      style={{ paddingTop: insets.top }}
+      className="flex-1 items-center bg-[#fff] dark:bg-[#050505]"
+    >
+      <View className="w-[100%] flex-1 md:w-[736px]">
+        <Header />
+
+        <SearchBar
+          isLoading={isLoading}
+          word={word}
+          onChangeText={setWord}
+          onSearch={onSearch}
+        />
+
+        <View className="web:px-4 h-[100%] w-[100%] flex-1 md:px-4">
+          {!data ? (
+            error ? (
+              <Text className="mx-4 text-base">{`${error}`}</Text>
+            ) : isLoading ? (
+              <Text className="mx-4 text-base">Loading...</Text>
+            ) : (
+              <View></View>
+            )
+          ) : (
+            <ScrollView
+              className="bg-red-100 px-4"
+              keyboardDismissMode="on-drag"
+            >
+              <View className="mt-2 flex-row items-center justify-between md:mt-8">
+                <View>
+                  <H1>{data[0]?.word}</H1>
+                  <Text className="text-lg text-[#a445ed]">{`${
+                    data[0]?.phonetic ? data[0]?.phonetic : ''
+                  }`}</Text>
+                </View>
+
+                <PlayButton />
+              </View>
+
+              <View className="h-[32px]" />
+
+              {data[0]?.meanings.map((meaning, index) => (
+                <WordMeaning meaning={meaning} key={index.toString()} />
+              ))}
+
+              <View className="mb-8 h-[2px] w-[100%] bg-[#f4f4f4] dark:bg-[#3a3a3a]"></View>
+
+              <View className="h-[50px]">
+                <Text className="text-base text-[#757575] underline">
+                  Source
+                </Text>
+                <A
+                  href={data[0]?.sourceUrls[0]}
+                  hrefAttrs={{ target: '_blank' }}
+                  className="dark:text-[#fff]"
+                >
+                  {data[0]?.sourceUrls[0]}
+                </A>
+              </View>
+
+              <View className="h-[50px]" />
+            </ScrollView>
+          )}
+        </View>
+      </View>
     </View>
-  )
+  );
 }
