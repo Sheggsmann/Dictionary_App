@@ -19,27 +19,32 @@ type IWordResponse = {
     definitions: { definition: string; synonyms: string[] }[];
   }[];
   sourceUrls: string[];
-};
+}[];
 
 export function HomeScreen() {
   const insets = useSafeArea();
   const [word, setWord] = useState('');
 
   const getWordMeaning = async (word: string) => {
-    const res = await fetch(
-      `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`
-    );
-    return res.json();
+    try {
+      const response = await fetch(
+        `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`
+      );
+      if (!response.ok) throw new Error("Couldn't find word");
+      return response.json();
+    } catch (err) {
+      throw new Error("Couldn't find word");
+    }
   };
 
-  const { data, error, isLoading, refetch } = useQuery(
-    ['wordMeaning'],
-    () => getWordMeaning(word),
-    {
-      enabled: false,
-      refetchOnWindowFocus: false,
-    }
-  );
+  const { data, error, isLoading, refetch } = useQuery<
+    IWordResponse | null,
+    { message?: string }
+  >('wordMeaning', () => getWordMeaning(word), {
+    enabled: false,
+    refetchOnWindowFocus: false,
+    retry: false,
+  });
 
   const onSearch = () => {
     if (word.length) refetch();
@@ -61,15 +66,11 @@ export function HomeScreen() {
         />
 
         <View className="web:px-4 h-[100%] w-[100%] flex-1 md:px-4">
-          {!data ? (
-            error ? (
-              <Text className="mx-4 text-base">{`${error}`}</Text>
-            ) : isLoading ? (
-              <Text className="mx-4 text-base">Loading...</Text>
-            ) : (
-              <View></View>
-            )
-          ) : (
+          {isLoading ? (
+            <Text className="mx-4 text-base">Loading...</Text>
+          ) : error ? (
+            <Text className="mx-4 text-base">{`${error?.message}`}</Text>
+          ) : data ? (
             <ScrollView
               className="bg-red-100 px-4"
               keyboardDismissMode="on-drag"
@@ -108,6 +109,8 @@ export function HomeScreen() {
 
               <View className="h-[50px]" />
             </ScrollView>
+          ) : (
+            <View />
           )}
         </View>
       </View>
