@@ -1,17 +1,10 @@
 import { View, Dot } from 'app/design/view';
 import { Text } from 'app/design/typography';
 import { Row } from 'app/design/layout';
+import { IMeaning } from 'app/features/home/screen';
 
-type WordMeaningProps = {
-  meaning: {
-    partOfSpeech: string;
-    definitions: {
-      definition: string;
-      synonyms?: string[];
-      antonyms?: string[];
-      example?: string;
-    }[];
-  };
+export type WordMeaningProps = {
+  meaning: IMeaning;
 };
 
 export default function WordMeaning({ meaning }: WordMeaningProps) {

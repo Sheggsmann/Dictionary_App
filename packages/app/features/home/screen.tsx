@@ -10,14 +10,21 @@ import { ScrollView } from 'react-native';
 import WordMeaning from 'app/components/WordMeaning';
 import PlayButton from 'app/components/PlayButton';
 
+export type IMeaning = {
+  partOfSpeech: string;
+  definitions: {
+    definition: string;
+    synonyms: string[];
+    antonyms?: string[];
+    example?: string;
+  }[];
+};
+
 type IWordResponse = {
   word: string;
   phonetic: string;
   phonetics: { text: string; audio: string }[];
-  meanings: {
-    partOfSpeech: string;
-    definitions: { definition: string; synonyms: string[] }[];
-  }[];
+  meanings: IMeaning[];
   sourceUrls: string[];
 }[];
 
@@ -88,7 +95,7 @@ export function HomeScreen() {
 
               <View className="h-[32px]" />
 
-              {data[0]?.meanings.map((meaning, index) => (
+              {data[0]?.meanings.map((meaning: IMeaning, index) => (
                 <WordMeaning meaning={meaning} key={index.toString()} />
               ))}
 
@@ -100,7 +107,10 @@ export function HomeScreen() {
                 </Text>
                 <A
                   href={data[0]?.sourceUrls[0]}
-                  hrefAttrs={{ target: '_blank' }}
+                  hrefAttrs={{
+                    target: '_blank',
+                    rel: 'noreferrer',
+                  }}
                   className="dark:text-[#fff]"
                 >
                   {data[0]?.sourceUrls[0]}
