@@ -97,6 +97,7 @@ export default function SearchBar({
       {error && (
         <View className="mx-4 mt-[-4]">
           <Text
+            className="text-base"
             style={{ color: Colors.red }}
           >{`Whoops, can't be empty...`}</Text>
         </View>

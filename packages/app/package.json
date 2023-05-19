@@ -3,10 +3,13 @@
   "name": "app",
   "main": "index.ts",
   "dependencies": {
+    "@expo/vector-icons": "^13.0.0",
     "@react-navigation/native": "^6.0.8",
     "@react-navigation/native-stack": "^6.5.0",
+    "expo-av": "^13.2.1",
     "moti": "latest",
     "nativewind": "2.0.9",
+    "react-query": "^3.39.3",
     "solito": "3.0.0"
   },
   "sideEffects": false

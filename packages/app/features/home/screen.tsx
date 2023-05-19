@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import { useQuery } from 'react-query';
+import { ScrollView, Keyboard } from 'react-native';
 import { A, H1, Text } from 'app/design/typography';
 import { View } from 'app/design/view';
 import Header from 'app/components/Header';
 import SearchBar from 'app/components/SearchBar';
+import WordMeaning from 'app/components/WordMeaning';
+import NotFound from 'app/components/NotFound';
+import PlayButton from 'app/components/PlayButton';
 
 import { useSafeArea } from 'app/provider/safe-area/use-safe-area';
-import { ScrollView } from 'react-native';
-import WordMeaning from 'app/components/WordMeaning';
-import PlayButton from 'app/components/PlayButton';
+import { getWordMeaning } from 'app/api/wordMeaning';
 
 export type IMeaning = {
   partOfSpeech: string;
@@ -32,29 +34,34 @@ export function HomeScreen() {
   const insets = useSafeArea();
   const [word, setWord] = useState('');
 
-  const getWordMeaning = async (word: string) => {
-    try {
-      const response = await fetch(
-        `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`
-      );
-      if (!response.ok) throw new Error("Couldn't find word");
-      return response.json();
-    } catch (err) {
-      throw new Error("Couldn't find word");
-    }
-  };
-
   const { data, error, isLoading, refetch } = useQuery<
     IWordResponse | null,
     { message?: string }
-  >('wordMeaning', () => getWordMeaning(word), {
+  >(['wordMeaning', word], () => getWordMeaning(word), {
     enabled: false,
     refetchOnWindowFocus: false,
     retry: false,
   });
 
   const onSearch = () => {
-    if (word.length) refetch();
+    if (word.length) {
+      refetch();
+      Keyboard.dismiss();
+    }
+  };
+
+  const getSoundUri = (data: IWordResponse): string => {
+    if (!data || !data[0]?.phonetics) return '';
+
+    let soundUri = '';
+    for (const phonetic of data[0].phonetics) {
+      if (phonetic?.audio) {
+        soundUri = phonetic?.audio;
+        break;
+      }
+    }
+
+    return soundUri;
   };
 
   return (
@@ -73,10 +80,14 @@ export function HomeScreen() {
         />
 
         <View className="web:px-4 h-[100%] w-[100%] flex-1 md:px-4">
-          {isLoading ? (
-            <Text className="mx-4 text-base">Loading...</Text>
-          ) : error ? (
-            <Text className="mx-4 text-base">{`${error?.message}`}</Text>
+          {isLoading || error ? (
+            isLoading ? (
+              <Text className="mx-4 text-base dark:text-[#fff]">
+                Loading...
+              </Text>
+            ) : (
+              <NotFound />
+            )
           ) : data ? (
             <ScrollView
               className="bg-red-100 px-4"
@@ -90,7 +101,7 @@ export function HomeScreen() {
                   }`}</Text>
                 </View>
 
-                <PlayButton />
+                <PlayButton soundUri={getSoundUri(data)} />
               </View>
 
               <View className="h-[32px]" />
